@@ -22,7 +22,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ldid dpkg fakeroot gnu-tar
+        sudo apt-get install -y dpkg fakeroot
+        sudo apt-get install -y ldid gnu-tar
 
     - name: Build tweak
       run: make package
