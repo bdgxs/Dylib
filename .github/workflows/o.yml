@@ -24,15 +24,19 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y dpkg fakeroot || echo "Installation of dpkg or fakeroot failed"
+        sudo apt-get install -y dpkg fakeroot
         sudo apt-get clean
         # Install ldid
         wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid
         sudo install -m 755 ldid /usr/local/bin/ldid
-        # Install gnu-tar if necessary (commented out as it might not be needed)
-        # wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
-        # tar -xzf tar-latest.tar.gz
-        # cd tar-* && ./configure && make && sudo make install
+      shell: bash
+      continue-on-error: true
+
+    - name: Verify dependencies installation
+      run: |
+        dpkg --version
+        fakeroot --version
+        ldid -h
 
     - name: Build tweak
       run: |
