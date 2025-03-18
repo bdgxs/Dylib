@@ -19,12 +19,24 @@ jobs:
         git clone https://github.com/theos/theos.git $HOME/theos
         echo "export THEOS=$HOME/theos" >> $GITHUB_ENV
         echo "export PATH=$HOME/theos/bin:$PATH" >> $GITHUB_ENV
+        echo "export THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y dpkg fakeroot ldid gnu-tar || echo "Installation of ldid or gnu-tar failed"
+        sudo apt-get install -y dpkg fakeroot || echo "Installation failed"
         sudo apt-get clean
+        # Install ldid from alternative sources
+        wget https://github.com/tpoechtrager/ldid/releases/download/v2.1.2/ldid
+        sudo mv ldid /usr/local/bin/
+        sudo chmod +x /usr/local/bin/ldid
+        # Install gnu-tar from source
+        wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
+        tar -xzf tar-latest.tar.gz
+        cd tar-1.34
+        ./configure
+        make
+        sudo make install
 
     - name: Build tweak
       run: make package
