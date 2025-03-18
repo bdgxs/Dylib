@@ -29,8 +29,8 @@ jobs:
         # Install ldid
         wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid
         sudo install -m 755 ldid /usr/local/bin/ldid
-      shell: bash
-      continue-on-error: true
+        # Verify ldid installation
+        if ! command -v ldid > /dev/null; then echo "ldid installation failed"; exit 1; fi
 
     - name: Verify dependencies installation
       run: |
