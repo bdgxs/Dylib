@@ -27,8 +27,8 @@ jobs:
         sudo apt-get install -y dpkg fakeroot || echo "Installation of dpkg or fakeroot failed"
         sudo apt-get clean
         # Install ldid
-        wget https://github.com/tpoechtrager/ldid/releases/download/v2.1.2/ldid
-        sudo mv ldid /usr/local/bin/
+        wget https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos_arm64
+        sudo mv ldid_iphoneos_arm64 /usr/local/bin/ldid
         sudo chmod +x /usr/local/bin/ldid
         # Install gnu-tar
         wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
