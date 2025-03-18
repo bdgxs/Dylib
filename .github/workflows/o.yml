@@ -16,10 +16,10 @@ jobs:
 
     - name: Set up Theos
       run: |
-        git clone https://github.com/theos/theos.git $HOME/theos
-        echo "export THEOS=$HOME/theos" >> $GITHUB_ENV
-        echo "export PATH=$HOME/theos/bin:$PATH" >> $GITHUB_ENV
-        echo "export THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
+        git clone --depth 1 https://github.com/theos/theos.git $HOME/theos
+        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+        echo "$HOME/theos/bin:$PATH" >> $GITHUB_PATH
+        echo "THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
@@ -27,16 +27,16 @@ jobs:
         sudo apt-get install -y dpkg fakeroot || echo "Installation of dpkg or fakeroot failed"
         sudo apt-get clean
         # Install ldid
-        wget https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos_arm64
-        sudo mv ldid_iphoneos_arm64 /usr/local/bin/ldid
-        sudo chmod +x /usr/local/bin/ldid
-        # Install gnu-tar
-        wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
-        tar -xzf tar-latest.tar.gz
-        cd tar-* && ./configure && make && sudo make install
+        wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid
+        sudo install -m 755 ldid /usr/local/bin/ldid
+        # Install gnu-tar if necessary (commented out as it might not be needed)
+        # wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
+        # tar -xzf tar-latest.tar.gz
+        # cd tar-* && ./configure && make && sudo make install
 
     - name: Build tweak
-      run: make package
+      run: |
+        make package FINALPACKAGE=1
 
     - name: Create Release
       id: create_release
@@ -44,8 +44,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
+        tag_name: v${{ github.run_number }}-${{ github.sha }}
+        release_name: Release v${{ github.run_number }}-${{ github.sha }}
         draft: false
         prerelease: false
 
@@ -55,6 +55,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./packages/*.deb
-        asset_name: cpuinfooverlay.deb
+        asset_path: ./${{ github.workspace }}/packages/*.deb
+        asset_name: cpuinfooverlay_${{ github.run_number }}.deb
         asset_content_type: application/octet-stream
