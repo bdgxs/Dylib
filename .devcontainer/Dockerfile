@@ -1,25 +1,28 @@
-name: Build iOS Tweak
+FROM ubuntu:latest
 
-on:
-  push:
-    branches:
-      - main # Or your desired branch
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    ldid \
+    wget \
+    dpkg-dev \
+    make \
+    perl \
+    zip \
+    unzip
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# Install Theos
+RUN git clone --recursive https://github.com/theos/theos.git /opt/theos
+ENV THEOS /opt/theos
+ENV PATH $THEOS/bin:$THEOS/bin:$PATH
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# Create the working directory
+RUN mkdir -p /Dylib
 
-      - name: Build Tweak (Docker)
-        uses: docker://ghcr.io/kabiroberai/theos-docker:latest # or your own docker image
-        with:
-          args: make package
+# Set the working directory
+WORKDIR /Dylib
 
-      - name: Upload .deb artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: cpuinfo-tweak
-          path: ./packages/*.deb
+# Install any other needed dependencies.
+# Example: If you need specific libraries for your tweak, install them here.
+# RUN apt-get install -y <your-library>
