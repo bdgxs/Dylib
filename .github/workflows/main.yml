@@ -22,7 +22,20 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y dpkg fakeroot ldid gnu-tar
+        sudo apt-get install -y dpkg fakeroot ldid gnu-tar || echo "Installation of ldid or gnu-tar failed"
+        sudo apt-get clean
+
+    - name: Install ldid from source if not available
+      run: |
+        if ! command -v ldid &> /dev/null
+        then
+          sudo apt-get install -y clang llvm libssl-dev
+          git clone https://github.com/ProcursusTeam/ldid.git
+          cd ldid
+          make
+          sudo make install
+          cd ..
+        fi
 
     - name: Build tweak
       run: make package
