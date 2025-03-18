@@ -33,10 +33,7 @@ jobs:
         # Install gnu-tar
         wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
         tar -xzf tar-latest.tar.gz
-        cd tar-*
-        ./configure
-        make
-        sudo make install
+        cd tar-* && ./configure && make && sudo make install
 
     - name: Build tweak
       run: make package
