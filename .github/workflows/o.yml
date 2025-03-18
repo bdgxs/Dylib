@@ -21,16 +21,15 @@ jobs:
         echo "export PATH=$HOME/theos/bin:$PATH" >> $GITHUB_ENV
         echo "export THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
 
-    - name: Install dependencies
+    - name: Clean environment and install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y dpkg fakeroot || echo "Installation failed"
         sudo apt-get clean
-        # Install ldid from alternative sources
+        sudo apt-get install -y dpkg fakeroot
+        # Install ldid and gnu-tar
         wget https://github.com/tpoechtrager/ldid/releases/download/v2.1.2/ldid
         sudo mv ldid /usr/local/bin/
         sudo chmod +x /usr/local/bin/ldid
-        # Install gnu-tar from source
         wget http://ftp.gnu.org/gnu/tar/tar-latest.tar.gz
         tar -xzf tar-latest.tar.gz
         cd tar-1.34
