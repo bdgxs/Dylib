@@ -20,7 +20,7 @@ ENV THEOS /opt/theos
 ENV PATH $THEOS/bin:$THEOS/bin:$PATH
 
 # Set the working directory
-WORKDIR /workspace
+WORKDIR /Dylib
 
 # Install any other needed dependencies.
 # Example: If you need specific libraries for your tweak, install them here.
