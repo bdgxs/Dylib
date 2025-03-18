@@ -27,7 +27,8 @@ jobs:
         sudo apt-get install -y dpkg fakeroot || echo "Installation of dpkg or fakeroot failed"
         sudo apt-get clean
         # Install ldid
-        wget https://github.com/tpoechtrager/ldid/releases/download/v2.1.2/ldid
+        wget https://github.com/tpoechtrager/ldid/releases/download/v2.1.2/ldid.zip
+        unzip ldid.zip
         sudo mv ldid /usr/local/bin/
         sudo chmod +x /usr/local/bin/ldid
         # Install gnu-tar
