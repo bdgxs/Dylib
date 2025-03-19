@@ -1,71 +1,34 @@
-name: Build iOS dylib on Ubuntu
+name: Build SystemInfo Tweak
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual triggering from the Actions tab on GitHub
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Resolve package issues
-      run: |
-        sudo rm /var/lib/dpkg/lock-frontend
-        sudo rm /var/lib/apt/lists/lock
-        sudo rm /var/cache/apt/archives/lock
-        sudo apt-get update
-        sudo apt-get install -f
-        sudo apt-get clean
-        sudo apt-get autoclean
+    - uses: actions/checkout@v3
 
     - name: Set up Theos
       run: |
-        sudo apt-get install -y git
-        git clone --depth 1 https://github.com/theos/theos.git $HOME/theos
-        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
-        echo "$HOME/theos/bin:$PATH" >> $GITHUB_PATH
+        #  Install Theos dependencies (you might need to adjust this)
+        sudo apt-get update
+        sudo apt-get install ldid git zip dpkg-dev
+
+        git clone --recursive https://github.com/theos/theos.git $HOME/theos
         echo "THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
-
-    - name: Install dependencies
+        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+        export THEOS=$HOME/theos
+        export THEOS_MAKE_PATH=$HOME/theos/makefiles
+        
+    - name: Build Tweak
       run: |
-        sudo apt-get install -y dpkg fakeroot || { echo "Failed to install dependencies"; exit 1; }
-        # Download and install ldid manually
-        wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid
-        sudo install -m 755 ldid /usr/local/bin/ldid || { echo "Failed to install ldid"; exit 1; }
+        export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
+        make package THEOS_PLATFORM_NAME=ios
 
-    - name: Verify dependencies installation
-      run: |
-        dpkg --version || { echo "Failed to verify dpkg"; exit 1; }
-        fakeroot --version || { echo "Failed to verify fakeroot"; exit 1; }
-        ldid -h || { echo "ldid installation failed"; exit 1; }
-
-    - name: Build dylib
-      run: |
-        make || { echo "Build failed"; exit 1; }
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload .deb artifact
+      uses: actions/upload-artifact@v3
       with:
-        tag_name: v${{ github.run_number }}-${{ github.sha }}
-        release_name: Release v${{ github.run_number }}-${{ github.sha }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Package to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ github.workspace }}/packages/*.dylib
-        asset_name: SystemInfo_${{ github.run_number }}.dylib
-        asset_content_type: application/octet-stream
+        name: systeminfo-tweak
+        path: ./packages/*.deb
