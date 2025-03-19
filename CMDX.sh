@@ -8,7 +8,7 @@ TWEAK_DIR="tmp_tweak"
 LOGOS_OUTPUT="Tweak.x.m"
 ENTITLEMENTS="entitlements.plist"
 P12_FILE="BDG.p12"
-P12_PASSWORD="AppleP12.com"
+P12_PASSWORD="BDG"
 KEYCHAIN_NAME="BDG"
 
 # --- Functions ---
