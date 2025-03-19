@@ -31,10 +31,10 @@ Logos Tweak.xm > $LOGOS_OUTPUT
 # Compile Swift files into a dynamic library
 swiftc -target arm64-apple-ios14.0 \
     -emit-library \
-    InfoProviders/CPUInfoProvider.swift \
-    InfoProviders/MemoryInfoProvider.swift \
-    UI/InfoWindow.swift \
-    UI/FloatingButton.swift \
+    CPUInfoProvider.swift \
+    MemoryInfoProvider.swift \
+    InfoWindow.swift \
+    FloatingButton.swift \
     SystemInfo.swift \
     $LOGOS_OUTPUT \
     -o $DYLIB_NAME \
@@ -51,7 +51,7 @@ mkdir -p "$TWEAK_DIR/Library/MobileSubstrate/DynamicLibraries"
 cp "$DYLIB_NAME" "$TWEAK_DIR/Library/MobileSubstrate/DynamicLibraries/$DYLIB_NAME"
 
 # Copy the control file
-cp control.txt "$TWEAK_DIR/control"
+cp control "$TWEAK_DIR/control"
 
 # Create a dummy Tweak.x (or copy the original)
 # This is needed for dpkg-deb, even though the actual logic is in the dylib
