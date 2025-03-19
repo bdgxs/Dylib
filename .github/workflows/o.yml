@@ -10,12 +10,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Set up Homebrew
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        brew update
+
+    - name: Install Theos Dependencies (Homebrew)
+      run: |
+        brew install ldid git zip dpkg # These are examples, adjust as needed!
+
     - name: Set up Theos
       run: |
-        #  Install Theos dependencies (you might need to adjust this)
-        sudo apt-get update
-        sudo apt-get install ldid git zip dpkg-dev
-
         git clone --recursive https://github.com/theos/theos.git $HOME/theos
         echo "THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
         echo "THEOS=$HOME/theos" >> $GITHUB_ENV
