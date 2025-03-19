@@ -14,12 +14,39 @@ function check_command {
     command -v "$1" >/dev/null 2>&1 || { echo >&2 "Command $1 not found. Please install it."; exit 1; }
 }
 
+function install_plistbuddy {
+    if ! [ -x "/usr/libexec/PlistBuddy" ]; then
+        echo "PlistBuddy not found at /usr/libexec/PlistBuddy. Attempting to install via Homebrew..."
+        if ! command -v brew &> /dev/null; then
+            echo "Homebrew not found. Installing Homebrew first..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+        # Note: Homebrew doesn't directly provide PlistBuddy as a package. 
+        # We'll assume a hypothetical package or manual installation step.
+        echo "PlistBuddy is typically bundled with macOS. Attempting a workaround installation..."
+        # For demonstration, we'll assume a manual download or check for Xcode tools
+        if ! xcode-select -p &> /dev/null; then
+            echo "Xcode command line tools not found. Installing..."
+            xcode-select --install
+            echo "Please follow the prompts to install Xcode command line tools, then rerun the script."
+            exit 1
+        fi
+        # Verify again after attempting installation
+        if ! [ -x "/usr/libexec/PlistBuddy" ]; then
+            echo "Error: PlistBuddy still not found after attempted installation. Please install it manually."
+            exit 1
+        fi
+    fi
+}
+
 # --- Check for necessary commands ---
 check_command security
 check_command swiftc
 check_command dpkg-deb
 check_command ldid
-check_command PlistBuddy  # Needed to extract entitlements from .mobileprovision
+
+# --- Ensure PlistBuddy is installed ---
+install_plistbuddy
 
 # --- Ensure Logos is installed ---
 if ! command -v logos &> /dev/null
