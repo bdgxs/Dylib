@@ -6,7 +6,7 @@ DYLIB_NAME="CMDX.dylib"
 DEB_PACKAGE="$PROJECT_NAME.deb"
 TWEAK_DIR="tmp_tweak"
 LOGOS_OUTPUT="Tweak.x.m"
-MOBILEPROVISION="BDG.mobileprovision"  # Replace with your .mobileprovision file
+MOBILEPROVISION="BDG.mobileprovision"  # Explicitly set to BDG.mobileprovision
 ENTITLEMENTS="entitlements.plist"      # Temporary file for extracted entitlements
 
 # --- Functions ---
@@ -28,9 +28,9 @@ then
     brew install logos
 fi
 
-# --- Extract Entitlements from .mobileprovision ---
+# --- Extract Entitlements from BDG.mobileprovision ---
 if [ ! -f "$MOBILEPROVISION" ]; then
-    echo "Error: $MOBILEPROVISION not found."
+    echo "Error: $MOBILEPROVISION not found. Please ensure BDG.mobileprovision exists in the current directory."
     exit 1
 fi
 
@@ -40,6 +40,7 @@ security cms -D -i "$MOBILEPROVISION" > decoded_provision.plist
 /usr/libexec/PlistBuddy -x -c "Print Entitlements" decoded_provision.plist > "$ENTITLEMENTS" 2>/dev/null
 if [ $? -ne 0 ]; then
     echo "Error: Failed to extract entitlements from $MOBILEPROVISION."
+    rm decoded_provision.plist  # Clean up even on failure
     exit 1
 fi
 rm decoded_provision.plist  # Clean up temporary file
@@ -100,7 +101,7 @@ fi
 
 # --- Code Signing ---
 
-# Sign the dylib with ldid using the extracted entitlements
+# Sign the dylib with ldid using the extracted entitlements from BDG.mobileprovision
 if ! ldid -S"$ENTITLEMENTS" "$TWEAK_DIR/Library/MobileSubstrate/DynamicLibraries/$DYLIB_NAME"; then
     echo "Error: Code signing failed."
     exit 1
