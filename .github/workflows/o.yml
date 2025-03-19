@@ -34,10 +34,19 @@ jobs:
           cd build_dir
           bash CMDX.sh
 
+      - name: List build_dir contents
+        run: |
+          ls -la build_dir
+
+      - name: Zip build_dir
+        run: |
+          cd build_dir
+          zip -r build_dir.zip .
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build_dir/CMDX.deb
+          files: build_dir/build_dir.zip
           tag_name: Beta # Set the tag name to Beta
           name: Beta # Set the release name to Beta
         env:
