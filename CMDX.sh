@@ -8,7 +8,7 @@ TWEAK_DIR="tmp_tweak" # Temporary directory to build the tweak structure
 LOGOS_OUTPUT="Tweak.x.m" # Output file after Logos processing
 ENTITLEMENTS="entitlements.plist" # Path to your entitlements file
 P12_FILE="BDG.p12" # Path to your .p12 file
-P12_PASSWORD="BDG" # Password for your .p12 file (if any)
+P12_PASSWORD="AppleP12.com" # Password for your .p12 file (if any)
 KEYCHAIN_NAME="BDG" # Name for the temporary keychain
 
 # --- Create a temporary keychain ---
