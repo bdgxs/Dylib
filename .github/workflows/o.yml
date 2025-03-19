@@ -23,24 +23,24 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y dpkg fakeroot || true
+        sudo apt-get update || { echo "Failed to update package list"; exit 1; }
+        sudo apt-get install -y dpkg fakeroot || { echo "Packages are already up-to-date or another error occurred"; exit 0; }
         sudo apt-get clean
         # Install ldid
-        wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid
-        sudo install -m 755 ldid /usr/local/bin/ldid
+        wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid || { echo "Failed to download ldid"; exit 1; }
+        sudo install -m 755 ldid /usr/local/bin/ldid || { echo "Failed to install ldid"; exit 1; }
         # Verify ldid installation
         if ! command -v ldid > /dev/null; then echo "ldid installation failed"; exit 1; fi
 
     - name: Verify dependencies installation
       run: |
-        dpkg --version
-        fakeroot --version
-        ldid -h
+        dpkg --version || { echo "Failed to verify dpkg"; exit 1; }
+        fakeroot --version || { echo "Failed to verify fakeroot"; exit 1; }
+        ldid -h || { echo "Failed to verify ldid"; exit 1; }
 
     - name: Build tweak
       run: |
-        make package FINALPACKAGE=1
+        make package FINALPACKAGE=1 || { echo "Build failed"; exit 1; }
 
     - name: Create Release
       id: create_release
