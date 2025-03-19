@@ -1,40 +1,42 @@
-name: Build and Release SystemInfo Tweak
+name: Build and Release Tweak
 
 on:
   workflow_dispatch: # Manual trigger
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Homebrew
-      run: |
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        brew update
+      - name: Install Dependencies
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          brew update
+          brew install ldid dpkg Logos
 
-    - name: Install Theos Dependencies (Homebrew)
-      run: |
-        brew install ldid git zip dpkg # These are examples, adjust as needed!
+      - name: Set up Keychain and Files
+        run: |
+          mkdir -p build_dir
+          chmod 777 build_dir
+          cp CMDX.sh control entitlements.plist BDG.p12 build_dir
+          cp CPUInfoProvider.swift FloatingButton.swift InfoWindow.swift MemoryInfoProvider.swift SystemInfo.swift build_dir
+          cp Tweak.x build_dir
+          cd build_dir
+          echo "BDG" > p12_password.txt
 
-    - name: Set up Theos
-      run: |
-        git clone --recursive https://github.com/theos/theos.git $HOME/theos
-        echo "THEOS_MAKE_PATH=$HOME/theos/makefiles" >> $GITHUB_ENV
-        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
-        export THEOS=$HOME/theos
-        export THEOS_MAKE_PATH=$HOME/theos/makefiles
-        
-    - name: Build Tweak
-      run: |
-        export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
-        make package THEOS_PLATFORM_NAME=ios
+      - name: Build Tweak
+        run: |
+          cd build_dir
+          bash CMDX.sh
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ./packages/*.deb
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build_dir/CMDX.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
