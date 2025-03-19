@@ -6,10 +6,8 @@ DYLIB_NAME="CMDX.dylib"
 DEB_PACKAGE="$PROJECT_NAME.deb"
 TWEAK_DIR="tmp_tweak"
 LOGOS_OUTPUT="Tweak.x.m"
-ENTITLEMENTS="entitlements.plist"
-P12_FILE="BDG.p12"
-P12_PASSWORD="BDG"
-KEYCHAIN_NAME="BDG"
+MOBILEPROVISION="BDG.mobileprovision"  # Replace with your .mobileprovision file
+ENTITLEMENTS="entitlements.plist"      # Temporary file for extracted entitlements
 
 # --- Functions ---
 function check_command {
@@ -21,6 +19,7 @@ check_command security
 check_command swiftc
 check_command dpkg-deb
 check_command ldid
+check_command PlistBuddy  # Needed to extract entitlements from .mobileprovision
 
 # --- Ensure Logos is installed ---
 if ! command -v logos &> /dev/null
@@ -29,18 +28,21 @@ then
     brew install logos
 fi
 
-# --- Create a temporary keychain ---
-security create-keychain -p temp "$KEYCHAIN_NAME"
-security unlock-keychain -p temp "$KEYCHAIN_NAME"
-
-# --- Import the .p12 certificate into the keychain ---
-if ! security import "$P12_FILE" -k "$KEYCHAIN_NAME" -P "$P12_PASSWORD" -T /usr/bin/codesign; then
-    echo "Error: Failed to import .p12 file. Check the password and file integrity."
+# --- Extract Entitlements from .mobileprovision ---
+if [ ! -f "$MOBILEPROVISION" ]; then
+    echo "Error: $MOBILEPROVISION not found."
     exit 1
 fi
 
-# --- Set keychain as default ---
-security default-keychain -s "$KEYCHAIN_NAME"
+echo "Extracting entitlements from $MOBILEPROVISION..."
+# Decode the .mobileprovision and extract the Entitlements dictionary
+security cms -D -i "$MOBILEPROVISION" > decoded_provision.plist
+/usr/libexec/PlistBuddy -x -c "Print Entitlements" decoded_provision.plist > "$ENTITLEMENTS" 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to extract entitlements from $MOBILEPROVISION."
+    exit 1
+fi
+rm decoded_provision.plist  # Clean up temporary file
 
 # --- Logos Processing ---
 if ! logos Tweak.xm > "$LOGOS_OUTPUT"; then
@@ -98,16 +100,13 @@ fi
 
 # --- Code Signing ---
 
-# Unlock Keychain (if needed) and Sign the dylib with ldid
-security unlock-keychain -p temp "$KEYCHAIN_NAME"
-
-# Sign the dylib with ldid
+# Sign the dylib with ldid using the extracted entitlements
 if ! ldid -S"$ENTITLEMENTS" "$TWEAK_DIR/Library/MobileSubstrate/DynamicLibraries/$DYLIB_NAME"; then
     echo "Error: Code signing failed."
     exit 1
 fi
 
-# --- Remove the temporary keychain ---
-security delete-keychain "$KEYCHAIN_NAME"
+# --- Cleanup ---
+rm -f "$ENTITLEMENTS"  # Remove temporary entitlements file
 
 echo "Build complete. Output: $DEB_PACKAGE"
