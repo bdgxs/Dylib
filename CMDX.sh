@@ -46,12 +46,13 @@ swiftc -target arm64-apple-ios14.0 \
 
 # Create the tweak directory structure
 mkdir -p "$TWEAK_DIR/Library/MobileSubstrate/DynamicLibraries"
+mkdir -p "$TWEAK_DIR/DEBIAN"
 
 # Copy the dynamic library
 cp "$DYLIB_NAME" "$TWEAK_DIR/Library/MobileSubstrate/DynamicLibraries/$DYLIB_NAME"
 
 # Copy the control file
-cp control "$TWEAK_DIR/control"
+cp control "$TWEAK_DIR/DEBIAN/control"
 
 # Create a dummy Tweak.x (or copy the original)
 # This is needed for dpkg-deb, even though the actual logic is in the dylib
