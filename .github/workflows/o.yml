@@ -38,5 +38,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: build_dir/CMDX.deb
+          tag_name: Beta # Set the tag name to Beta
+          name: Beta # Set the release name to Beta
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
