@@ -19,8 +19,9 @@ jobs:
           brew update
           brew install ldid dpkg Logos
 
-      - name: Set up Keychain and Files
+      - name: Clean and Set Up Build Directory
         run: |
+          rm -rf build_dir
           mkdir -p build_dir
           chmod 777 build_dir
           cp CMDX.sh control entitlements.plist BDG.p12 build_dir
