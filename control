@@ -1,0 +1,7 @@
+Package: com.bdg.backdoor
+Name: Backdoor
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: A simple tweak to display CPU information as an overlay.
+Maintainer: BDG
+Depends: firmware (>= 13.0)
