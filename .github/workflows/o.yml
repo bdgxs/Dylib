@@ -14,9 +14,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Resolve package issues
+      run: |
+        sudo rm /var/lib/dpkg/lock-frontend
+        sudo rm /var/lib/apt/lists/lock
+        sudo rm /var/cache/apt/archives/lock
+        sudo apt-get update
+        sudo apt-get install -f
+        sudo apt-get clean
+        sudo apt-get autoclean
+
     - name: Set up Theos
       run: |
-        sudo apt-get update
         sudo apt-get install -y git
         git clone --depth 1 https://github.com/theos/theos.git $HOME/theos
         echo "THEOS=$HOME/theos" >> $GITHUB_ENV
@@ -25,7 +34,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get install -y dpkg fakeroot
+        sudo apt-get install -y dpkg fakeroot || { echo "Failed to install dependencies"; exit 1; }
         # Download and install ldid manually
         wget -qO- https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_iphoneos-arm64 > ldid
         sudo install -m 755 ldid /usr/local/bin/ldid || { echo "Failed to install ldid"; exit 1; }
