@@ -21,7 +21,13 @@ check_command security
 check_command swiftc
 check_command dpkg-deb
 check_command ldid
-check_command Logos
+
+# --- Ensure Logos is installed ---
+if ! command -v logos &> /dev/null
+then
+    echo "Logos not found. Installing Logos using Homebrew..."
+    brew install logos
+fi
 
 # --- Create a temporary keychain ---
 security create-keychain -p temp "$KEYCHAIN_NAME"
@@ -37,7 +43,7 @@ fi
 security default-keychain -s "$KEYCHAIN_NAME"
 
 # --- Logos Processing ---
-if ! Logos Tweak.xm > "$LOGOS_OUTPUT"; then
+if ! logos Tweak.xm > "$LOGOS_OUTPUT"; then
     echo "Error: Logos processing failed."
     exit 1
 fi
