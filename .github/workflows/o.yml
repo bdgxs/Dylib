@@ -28,12 +28,14 @@ jobs:
         # Set SDKROOT and THEOS_PLATFORM_NAME for iOS
         echo "SDKROOT=$(xcodebuild -version -sdk iphoneos Path)" >> $GITHUB_ENV
         echo "THEOS_PLATFORM_NAME=iphoneos" >> $GITHUB_ENV
+        # Additional environment variables to force iOS build
+        echo "THEOS_PLATFORM_SDK=iphoneos" >> $GITHUB_ENV
+        echo "THEOS_TARGET_PLATFORM=iphone" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
         brew update
         brew install dpkg
-        # Assuming ldid is needed for signing
         curl -LO https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_macosx_x86_64
         sudo install -m 755 ldid_macosx_x86_64 /usr/local/bin/ldid
 
@@ -44,7 +46,7 @@ jobs:
 
     - name: Build dylib
       run: |
-        make || { echo "Build failed"; exit 1; }
+        make THEOS_PLATFORM_NAME=iphoneos || { echo "Build failed"; exit 1; }
 
     - name: Create Release
       id: create_release
