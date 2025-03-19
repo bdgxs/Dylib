@@ -1,7 +1,7 @@
-name: Build SystemInfo Tweak
+name: Build and Release SystemInfo Tweak
 
 on:
-  workflow_dispatch: # Allows manual triggering from the Actions tab on GitHub
+  workflow_dispatch: # Manual trigger
 
 jobs:
   build:
@@ -27,8 +27,9 @@ jobs:
         export SDKROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
         make package THEOS_PLATFORM_NAME=ios
 
-    - name: Upload .deb artifact
-      uses: actions/upload-artifact@v3
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: systeminfo-tweak
-        path: ./packages/*.deb
+        files: ./packages/*.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
